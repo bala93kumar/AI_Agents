@@ -1,0 +1,52 @@
+# Example Data Curation Configuration
+# This file demonstrates various curation rules
+
+name: "Customer Data Curation"
+version: "1.0.0"
+description: "Curate customer dataset with validation, filtering, and transformation"
+
+rules:
+  # Rule 1: Remove rows with null email addresses
+  - type: filter
+    name: "Remove records without email"
+    condition: "email.notna()"
+    description: "Keep only records that have an email address"
+
+  # Rule 2: Remove records with invalid status
+  - type: filter
+    name: "Filter valid status"
+    condition: "status.isin(['active', 'inactive', 'pending'])"
+    description: "Keep only records with valid status values"
+
+  # Rule 3: Transform text fields
+  - type: transform
+    name: "Normalize text fields"
+    description: "Convert name and email to consistent format"
+    transforms:
+      - column: "name"
+        operation: "strip"
+      - column: "email"
+        operation: "lowercase"
+      - column: "status"
+        operation: "lowercase"
+
+  # Rule 4: Validation checks
+  - type: validate
+    name: "Data quality checks"
+    description: "Check data quality metrics"
+    checks:
+      - column: "email"
+        type: "not_null"
+      - column: "created_at"
+        type: "not_null"
+      - column: "customer_id"
+        type: "unique"
+
+  # Rule 5: Deduplication
+  - type: deduplicate
+    name: "Remove duplicate customers"
+    description: "Keep only the first occurrence of each customer"
+    subset:
+      - "customer_id"
+      - "email"
+    keep: "first"

@@ -1,0 +1,135 @@
+# Data Curation Configuration Schema
+# This file defines the structure for curation requirement YAML files
+
+$schema: "http://json-schema.org/draft-07/schema#"
+
+type: object
+required:
+  - name
+  - version
+  - rules
+
+properties:
+  name:
+    type: string
+    description: "Name of the curation configuration"
+    
+  version:
+    type: string
+    description: "Version of the configuration (e.g., 1.0.0)"
+    
+  description:
+    type: string
+    description: "Optional description of what this curation does"
+    
+  rules:
+    type: array
+    description: "List of curation rules to apply"
+    items:
+      oneOf:
+        - $ref: "#/definitions/filterRule"
+        - $ref: "#/definitions/transformRule"
+        - $ref: "#/definitions/validationRule"
+        - $ref: "#/definitions/deduplicateRule"
+
+definitions:
+  filterRule:
+    type: object
+    required:
+      - type
+      - condition
+    properties:
+      type:
+        const: "filter"
+      name:
+        type: string
+      condition:
+        type: string
+        description: "Pandas condition expression (e.g., 'column > 5')"
+      description:
+        type: string
+
+  transformRule:
+    type: object
+    required:
+      - type
+      - transforms
+    properties:
+      type:
+        const: "transform"
+      name:
+        type: string
+      transforms:
+        type: array
+        items:
+          type: object
+          required:
+            - column
+            - operation
+          properties:
+            column:
+              type: string
+            operation:
+              type: string
+              enum:
+                - lowercase
+                - uppercase
+                - strip
+                - fillna
+                - drop
+      description:
+        type: string
+
+  validationRule:
+    type: object
+    required:
+      - type
+      - checks
+    properties:
+      type:
+        const: "validate"
+      name:
+        type: string
+      checks:
+        type: array
+        items:
+          type: object
+          required:
+            - column
+            - type
+          properties:
+            column:
+              type: string
+            type:
+              type: string
+              enum:
+                - not_null
+                - unique
+                - range
+                - pattern
+      description:
+        type: string
+
+  deduplicateRule:
+    type: object
+    required:
+      - type
+    properties:
+      type:
+        const: "deduplicate"
+      name:
+        type: string
+      subset:
+        type: array
+        items:
+          type: string
+        description: "Columns to consider for deduplication"
+      keep:
+        type: string
+        enum:
+          - first
+          - last
+          - false
+        default: "first"
+      description:
+        type: string

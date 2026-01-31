@@ -1,0 +1,81 @@
+agent:
+  name: databricks-ai-agent
+  version: 1.0.0
+  description: AI-powered Databricks job monitoring and error handling
+
+azure_openai:
+  deployment_name: gpt-4
+  api_version: "2024-02-15-preview"
+  temperature: 0.7
+  max_tokens: 1000
+
+error_handling:
+  max_retry_attempts: 3
+  max_retry_with_params_attempts: 2
+  error_analysis_timeout: 30
+  # Common retry patterns
+  retry_patterns:
+    timeout: "RETRY"
+    memory_error: "RETRY_WITH_PARAMS"
+    network_error: "RETRY"
+    database_error: "ESCALATE_EMAIL"
+    permission_error: "ESCALATE_EMAIL"
+
+databricks:
+  # Job monitoring settings
+  check_interval_seconds: 300  # Check every 5 minutes
+  max_jobs_per_run: 100
+  lookback_hours: 24
+  
+  # Job states to monitor
+  monitored_states:
+    - FAILED
+    - INTERNAL_ERROR
+
+monitoring:
+  # Escalation settings
+  escalation_conditions:
+    - condition: "failed_3_times"
+      action: "send_email"
+      threshold: 3
+  
+  # Report settings
+  send_daily_summary: true
+  summary_time: "09:00"  # UTC
+
+email:
+  smtp_port: 587
+  use_tls: true
+  timeout_seconds: 10
+  
+  # Email templates
+  templates:
+    subject: "Databricks Job Alert: {job_name} failed"
+    from_name: "Databricks AI Agent"
+
+fine_tuning:
+  enabled: true
+  auto_retrain: true
+  retrain_interval_days: 30
+  min_examples: 100
+  
+  # Training data collection
+  collect_decisions: true
+  store_path: "/dbfs/databricks_agent/training_data"
+
+logging:
+  level: INFO
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  file: "/tmp/databricks_agent.log"
+  
+notifications:
+  # Notification channels
+  channels:
+    - type: email
+      enabled: true
+    - type: slack
+      enabled: false
+      webhook_url: ""
+    - type: webhook
+      enabled: false
+      url: ""

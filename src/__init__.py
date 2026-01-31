@@ -1,14 +1,3 @@
-"""Data Curation Agent Package"""
+"""AI Agent for Databricks with Azure OpenAI Integration"""
 
-__version__ = "0.1.0"
-__author__ = "AI Agents"
-
-from .agent import DataCurationAgent
-from .config_parser import ConfigParser
-from .rules_engine import RulesEngine
-
-__all__ = [
-    "DataCurationAgent",
-    "ConfigParser",
-    "RulesEngine",
-]
+__version__ = "1.0.0"
